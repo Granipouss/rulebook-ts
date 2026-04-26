@@ -1,7 +1,7 @@
 {
   "name": "rulebook-ts",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A tiny, type-safe rule parsing system for TypeScript.",
   "author": "Granipouss <granipouss@mail.com>",
   "license": "MIT",
