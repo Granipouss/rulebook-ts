@@ -101,15 +101,20 @@ export class RuleTemplate<
   }
 
   match(value: string): RuleObject<T, PlaceholderMap> | null {
-    const match = value.match(this.regex);
-    if (!match) return null;
+    try {
+      const match = value.match(this.regex);
+      if (!match) return null;
 
-    const params = this.paramTypes.map((type, i) => {
-      const raw = match[i + 1];
-      return this.placeholders[type].parse(raw);
-    });
+      const params = this.paramTypes.map((type, i) => {
+        const raw = match[i + 1];
+        return this.placeholders[type].parse(raw);
+      });
 
-    return new RuleObject({ value, template: this.name, params });
+      return new RuleObject({ value, template: this.name, params });
+    } catch {
+      // If parsing fails, it is not a match
+      return null;
+    }
   }
 }
 

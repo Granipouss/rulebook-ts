@@ -133,4 +133,51 @@ describe("RuleBook", () => {
     ]);
     expect(rulesetPlains.get("Has [n] [yield] yield on [terrain]")).toEqual([]);
   });
+
+  it('should use "check" for more complex patterns', () => {
+    const conditionBook = new RuleBook(
+      ["on [terrain]", "next to [terrain]", "next to River"],
+      {
+        terrain: {
+          pattern: /Ocean|Coast|Lake|Snow|Tundra|Plains|Grassland|Desert/,
+          parse: (s) => s as TerrainType,
+        },
+      },
+    );
+
+    const book = new RuleBook(
+      ["no bonus yield", "[n] [yield]", "[n] [yield] [condition]"],
+      {
+        n: {
+          pattern: /-?\d+/,
+          parse: (s) => Number(s),
+        },
+        yield: {
+          pattern: /Food|Production|Gold/,
+          parse: (s) => s as YieldType,
+        },
+        condition: {
+          pattern: /(?:on|next to) .+/,
+          parse: (s) => conditionBook.create(s).params,
+        },
+      },
+    );
+
+    const bonusA = book.create("2 Gold next to River");
+    const bonusB = book.create("2 Food on Desert");
+
+    expect(bonusA).toEqual({
+      template: "[n] [yield] [condition]",
+      value: "2 Gold next to River",
+      params: [2, "Gold", []],
+    });
+    expect(bonusB).toEqual({
+      template: "[n] [yield] [condition]",
+      value: "2 Food on Desert",
+      params: [2, "Food", ["Desert"]],
+    });
+
+    const params = bonusB.get("[n] [yield] [condition]");
+    expect(params).toEqual([2, "Food", ["Desert"]]);
+  });
 });
