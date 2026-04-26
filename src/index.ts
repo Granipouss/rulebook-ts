@@ -34,6 +34,14 @@ export class RuleBook<T extends string, TPlaceholders extends IPlaceholders> {
     this.placeholders = placeholders;
   }
 
+  create(rule: string) {
+    for (const template of this.templates) {
+      const match = template.match(rule);
+      if (match) return match;
+    }
+    throw new Error(`Could not parse: ${rule}`);
+  }
+
   createSet(rules: string[]): Ruleset<T, PlaceholderMap<TPlaceholders>> {
     return new Ruleset<T, PlaceholderMap<TPlaceholders>>(
       rules.map((rule) => {
@@ -92,7 +100,7 @@ export class RuleTemplate<
     this.paramTypes = paramTypes;
   }
 
-  match(value: string): Rule<T, RuleParams<T, PlaceholderMap>> | null {
+  match(value: string): RuleObject<T, PlaceholderMap> | null {
     const match = value.match(this.regex);
     if (!match) return null;
 
@@ -101,7 +109,35 @@ export class RuleTemplate<
       return this.placeholders[type].parse(raw);
     });
 
-    return { value, template: this.name, params };
+    return new RuleObject({ value, template: this.name, params });
+  }
+}
+
+export class RuleObject<
+  T extends string,
+  PlaceholderMap extends Record<string, unknown>,
+> implements Rule {
+  value: string;
+  template: string;
+  params: RuleParams<T, PlaceholderMap>[];
+
+  constructor({ value, template, params }: Rule) {
+    this.value = value;
+    this.template = template;
+    this.params = params as RuleParams<T, PlaceholderMap>[];
+  }
+
+  is(template: T): boolean {
+    return this.template === template;
+  }
+
+  get<U extends T>(template: U): RuleParams<U, PlaceholderMap> {
+    if (this.template !== template) {
+      throw new Error(
+        `Rule is of type "${this.template}" on not "${template}"`,
+      );
+    }
+    return this.params as RuleParams<U, PlaceholderMap>;
   }
 }
 

@@ -37,6 +37,36 @@ describe("RuleBook", () => {
       },
     );
 
+    const ruleDesert = book.create("Has no base yield");
+    const ruleGrassland = book.create("Has 2 Food yield");
+
+    expect(ruleDesert).toMatchInlineSnapshot(`
+      RuleObject {
+        "params": [],
+        "template": "Has no base yield",
+        "value": "Has no base yield",
+      }
+    `);
+    expect(ruleGrassland).toMatchInlineSnapshot(`
+      RuleObject {
+        "params": [
+          2,
+          "Food",
+        ],
+        "template": "Has [n] [yield] yield",
+        "value": "Has 2 Food yield",
+      }
+    `);
+
+    expect(ruleDesert.is("Has no base yield")).toBe(true);
+    expect(ruleGrassland.is("Has no base yield")).toBe(false);
+    expect(ruleGrassland.is("Has [n] [yield] yield")).toBe(true);
+
+    expect(() => ruleGrassland.get("Has no base yield")).toThrow(
+      `Rule is of type "Has [n] [yield] yield" on not "Has no base yield"`,
+    );
+    expect(ruleGrassland.get("Has [n] [yield] yield")).toEqual([2, "Food"]);
+
     const rulesetSnow = book.createSet(["Has no base yield"]);
     const rulesetTundra = book.createSet(["Has 1 Food yield"]);
     const rulesetPlains = book.createSet([

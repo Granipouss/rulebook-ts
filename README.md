@@ -8,11 +8,11 @@ Define string templates with typed placeholders, parse runtime values into stron
 
 ## ✨ Features
 
-🧩 Template-based string matching ("user:[id]")
-🔒 Fully type-safe parameter inference
-⚡ Fast runtime matching using compiled RegExp
-🧠 Typed query API (ruleset.get(...))
-🔗 Merge multiple rule sets easily
+- 🧩 Template-based string matching `("user:[id]")`
+- 🔒 Fully type-safe parameter inference
+- ⚡ Fast runtime matching using compiled RegExp
+- 🧠 Typed query API `(ruleset.get(...))`
+- 🔗 Merge multiple rule sets easily
 
 ## 📦 Installation
 
@@ -40,6 +40,7 @@ const templates = ["user:[id]", "post:[slug]"] as const;
 
 const book = new RuleBook(templates, placeholders);
 
+const rule = book.create("user:42");
 const ruleset = book.createSet(["user:42", "post:hello-world"]);
 ```
 
@@ -48,6 +49,9 @@ const ruleset = book.createSet(["user:42", "post:hello-world"]);
 The magic is that parameters are inferred directly from your template:
 
 ```ts
+const user = rule.get("user:[id]");
+//     ⇖ [number]
+
 const users = ruleset.get("user:[id]");
 //     ⇖ [number][]
 
